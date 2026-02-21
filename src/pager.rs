@@ -50,7 +50,8 @@ pub fn format_content(content: &String) -> std::io::Result<String> {
                     while let Some(question) = answer_iter.next() {
                         ratings.push(format!("[{}] {}", info, question.get_text()?));
                     }
-                } else if prompt_type == PromptQuestionType::Description {
+                } 
+                else if prompt_type == PromptQuestionType::Description {
                     if let Some(question) = answer_iter.next() {
                         descriptions.push(format!("    [{}] {}", info, question.get_text()?));
                     }
@@ -58,24 +59,35 @@ pub fn format_content(content: &String) -> std::io::Result<String> {
                     while let Some(question) = answer_iter.next() {
                         descriptions.push(format!("{}", question.get_text()?));
                     }
-                } else if prompt_type == PromptQuestionType::Note {
+                } 
+                else if prompt_type == PromptQuestionType::Note {
                     if let Some(question) = answer_iter.next() {
                         notes.push(format!("    [{}] {}", info, question.get_text()?));
                     }
-
                     while let Some(question) = answer_iter.next() {
                         notes.push(format!("{}", question.get_text()?));
                     }
                 } 
-                
                 else if chunk_type == QuestionType::Long {
+                    let question_text = this_chunk.get_question()?.get_text()?;
+                    let mut answer: String = "".to_string();
+
+                    if let Some(question) = answer_iter.next() {
+                        let answer_line = format!("    [{}] {}", info, question.get_text()?); 
+                        answer += answer_line.as_str();
+                    }
+
                     while let Some(question) = answer_iter.next() {
-                        let question_text = this_chunk.get_question()?.get_text()?;
-                        long_questions.entry(question_text)
-                            .or_insert(Vec::new())
-                            .push(format!("[{}] {}", info, question.get_text()?));
-                   }
-                } else {
+                        let answer_line = format!("\n{}", question.get_text()?); 
+                        answer += answer_line.as_str();
+                    }
+
+                    long_questions.entry(question_text)
+                        .or_insert(Vec::new())
+                        .push(answer);
+ 
+                }
+                else {
                     while let Some(question) = answer_iter.next() {
                         let question_text = this_chunk.get_question()?.get_text()?;
                         short_questions.entry(question_text)
@@ -112,11 +124,10 @@ pub fn format_content(content: &String) -> std::io::Result<String> {
         return_content += "daily questions: \n";
         for (key, val) in long_questions {
             return_content += key.as_str();
-            return_content += "\n    ";
-            return_content += val.join("\n    ").as_str();
             return_content += "\n";
+            return_content += val.join("\n").as_str();
+            return_content += "\n\n";
         }
-        return_content += "\n";
     }
 
     if !short_questions.is_empty() {
@@ -126,7 +137,6 @@ pub fn format_content(content: &String) -> std::io::Result<String> {
             return_content += val.join(" -> ").as_str();
             return_content += "\n\n";
         }
-        return_content += "\n";
     }
 
     if invalid_chunks_number != 0 {
