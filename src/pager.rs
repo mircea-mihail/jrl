@@ -29,19 +29,18 @@ pub fn format_content(content: &String) -> std::io::Result<String> {
             this_chunk_str += "\n";
         }
         if (line.is_empty() || lines.peek().is_none()) && !this_chunk_str.trim().is_empty() {
-            let mut invalid_chunk = false;
 
             this_chunk_str = this_chunk_str.trim().to_string();
             let this_chunk = QuestionChunk::from(this_chunk_str.clone());
 
             let chunk_type = this_chunk.get_type().unwrap_or_else(|_| {
-                invalid_chunk = true;
                 invalid_chunks_number += 1;
 
                 QuestionType::Empty
             });
 
-            if !invalid_chunk {
+            // invalid might as well be empty
+            if chunk_type != QuestionType::Empty {
                 let mut answer_iter = this_chunk.get_answer()?.into_iter();
                 let info = this_chunk.get_informative()?.get_text()?;
                 let prompt_type = this_chunk.get_prompt_type()?;
