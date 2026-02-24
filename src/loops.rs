@@ -62,9 +62,10 @@ pub fn get_input(
     Ok(())
 }
 
-pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
+pub fn get_jrl_files(jrl_dir_path: &std::path::PathBuf) ->  io::Result<Vec<std::path::PathBuf>>{
     let dir_files = fs::read_dir(jrl_dir_path)?;
     let mut journal_paths: Vec<std::path::PathBuf> = Vec::new();
+
     for file in dir_files {
         let path = file?.path();
 
@@ -81,6 +82,12 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
         }
     }
     journal_paths.sort();
+
+    Ok(journal_paths)
+}
+
+pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
+    let journal_paths = get_jrl_files(jrl_dir_path)?;
     let idx_max_len = journal_paths.len() - 1;
 
     let mut file_index = idx_max_len;
