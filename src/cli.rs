@@ -14,6 +14,7 @@ const DEFAULT_RATING: &str = "1212.1212";
 const DEFAULT_SOMETIMES: &str = "true";
 const DEFAULT_ENTRIES: &str = "true";
 const DEFAULT_UPDATE_QUESTIONS: &str = "true";
+const DEFAULT_ANALYTICS: &str = "true";
 
 const QUESTION_CHANCE: f64 = 0.5;
 
@@ -71,10 +72,20 @@ pub struct Cli {
     /// Use the questions from the questions.txt file in the current directory
     #[arg (
         long,
+        short,
         num_args = 0..=1,
         default_missing_value = DEFAULT_UPDATE_QUESTIONS
     )]
     install_questions: Option<bool>,
+
+    /// Show analytics for all journal entries
+    #[arg (
+        short,
+        long,
+        num_args = 0..=1,
+        default_missing_value = DEFAULT_ANALYTICS
+    )]
+    analytics: Option<bool>,
 }
 
 pub fn install_questions() -> bool {
@@ -89,6 +100,20 @@ pub fn install_questions() -> bool {
     }
 
     install_questions
+}
+
+pub fn show_analytics() -> bool {
+    let args = Cli::parse();
+
+    let mut show_analytics: bool = false;
+    match args.analytics {
+        Some(s) => {
+            show_analytics = s;
+        }
+        None => (),
+    }
+
+    show_analytics
 }
 
 pub fn parse_days_before() -> i64 {
