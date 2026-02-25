@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, io::Write};
+use std::{collections::BTreeMap, io::{self, Write}};
 
 use crossterm::{
     cursor, execute, queue,
@@ -10,7 +10,39 @@ use crate::question_structs::{
     ChunkParser, Informative, PromptQuestionType, QuestionChunk, QuestionType,
 };
 
-// const format_error_chunk: QuestionChunk  = QuestionChunk::new();
+#[derive(Debug)]
+pub enum ChunkError {
+    EmptyChunk,
+    MalformedChunk,
+    UnexpectedFileEnd,
+}
+
+pub fn get_next_chunk(lines: &mut std::iter::Peekable<std::str::Lines<'_>>) -> Result<QuestionChunk, ChunkError>{
+    let mut this_chunk_str: String = "".to_string();
+
+    while let Some(line) = lines.next() {
+        if !line.is_empty() {
+            eprintln!("line: {}", line);
+            this_chunk_str += line;
+            this_chunk_str += "\n";
+        } 
+        else if this_chunk_str.trim().is_empty() {
+            return Err(ChunkError::EmptyChunk);
+        }
+        if lines.peek().is_none() || line.is_empty()  {
+            this_chunk_str = this_chunk_str.trim().to_string();
+            eprintln!("{}", this_chunk_str);
+            let this_chunk = QuestionChunk::from(this_chunk_str.clone());
+
+            // todo replace get_type with a check_chunk
+            match this_chunk.get_type() {
+                Ok(_) => return Ok(this_chunk),
+                _ => return Err(ChunkError::MalformedChunk),
+            }
+        }
+    }
+    Err(ChunkError::UnexpectedFileEnd)
+}
 
 pub fn format_content(content: &String) -> std::io::Result<String> {
     let mut invalid_chunks_number = 0;
@@ -19,28 +51,14 @@ pub fn format_content(content: &String) -> std::io::Result<String> {
     let mut ratings: Vec<String> = Vec::new();
     let mut long_questions: BTreeMap<String, Vec<String>>= BTreeMap::new();
     let mut short_questions: BTreeMap<String, Vec<String>>= BTreeMap::new();
-    let mut this_chunk_str: String = "".to_string();
 
-    let mut lines = content.lines().peekable();
+    let mut lines: std::iter::Peekable<std::str::Lines<'_>> = content.lines().peekable();
 
-    while let Some(line) = lines.next() {
-        if !line.is_empty() {
-            this_chunk_str += line;
-            this_chunk_str += "\n";
-        }
-        if (line.is_empty() || lines.peek().is_none()) && !this_chunk_str.trim().is_empty() {
+    loop {
+        match get_next_chunk(&mut lines) {
+            Ok(this_chunk) => {
+                let chunk_type = this_chunk.get_type().unwrap_or_else(|_| { QuestionType::Empty});
 
-            this_chunk_str = this_chunk_str.trim().to_string();
-            let this_chunk = QuestionChunk::from(this_chunk_str.clone());
-
-            let chunk_type = this_chunk.get_type().unwrap_or_else(|_| {
-                invalid_chunks_number += 1;
-
-                QuestionType::Empty
-            });
-
-            // invalid might as well be empty
-            if chunk_type != QuestionType::Empty {
                 let mut answer_iter = this_chunk.get_answer()?.into_iter();
                 let info = this_chunk.get_informative()?.get_text()?;
                 let prompt_type = this_chunk.get_prompt_type()?;
@@ -84,7 +102,7 @@ pub fn format_content(content: &String) -> std::io::Result<String> {
                     long_questions.entry(question_text)
                         .or_insert(Vec::new())
                         .push(answer);
- 
+
                 }
                 else {
                     while let Some(question) = answer_iter.next() {
@@ -95,8 +113,15 @@ pub fn format_content(content: &String) -> std::io::Result<String> {
                     }
                 }
             }
-
-            this_chunk_str = "".to_string();
+            Err(ChunkError::MalformedChunk) => {
+                invalid_chunks_number += 1;
+            }
+            Err(ChunkError::EmptyChunk) => {
+                invalid_chunks_number += 1;
+            }
+            Err(ChunkError::UnexpectedFileEnd) => {
+                break;
+            }
         }
     }
     let mut return_content = "".to_string();

@@ -1,13 +1,9 @@
-// todo and features to add:
-//
 // make the vim extension go to normal mode when pressing kj
 // make cursor different in insert and normal mode (| for insert, box for insert)
 //
 // use flags to input things:
 //      jrl -w to show week notes
 //      jrl -m to show months notes highlights
-//      show a table/graph for short questions for the week
-//      and maybe something interactive with browsing longer notes/ a compilation of notes?
 
 mod cli;
 mod question_structs;
@@ -23,7 +19,7 @@ use rand::Rng;
 use std::fs;
 use std::fs::OpenOptions;
 
-use crate::cli::parse_days_before;
+use crate::{cli::parse_days_before, loops::get_jrl_files, question_structs::{QuestionChunk, QuestionType, Informative, ChunkParser, PromptQuestionType}};
 
 const JRL_DIR_NAME: &str = ".jrl";
 const QUESTION_FILE_NAME: &str = "questions.txt";
@@ -53,6 +49,38 @@ fn main() -> rustyline::Result<()> {
             }
         }
     }
+
+    if cli::show_analytics() {
+        println!("Analytics for the past 30 entries:\n");
+
+        let entries_number = 30;
+        let all_files = get_jrl_files(&jrl_dir_path)?;
+        let recent_entries = &all_files[all_files.len().saturating_sub(entries_number)..];
+
+        let mut best_rating: f64;
+        let mut best_rating: QuestionChunk;
+
+        let mut this_chunk_str: String = "".to_string();
+
+        for file in recent_entries {
+            let  file_content = fs::read_to_string(file)?;
+            let mut lines = file_content.lines().peekable();
+            loop {
+                match pager::get_next_chunk(&mut lines) {
+                    Ok(this_chunk) => {
+
+                    }
+
+                    Err(_) => {
+
+                    }
+                }
+            }
+        }
+
+        return Ok(());
+    }
+    
     let days_before_today: i64 = parse_days_before();
 
     let today_file = utility::get_day_file_name(days_before_today);
