@@ -14,12 +14,13 @@ mod pager;
 mod utility;
 
 use home;
+use core::f64;
 use std::path::PathBuf;
 use rand::Rng;
 use std::fs;
 use std::fs::OpenOptions;
 
-use crate::{cli::parse_days_before, loops::get_jrl_files, question_structs::{QuestionChunk, QuestionType, Informative, ChunkParser, PromptQuestionType}};
+use crate::{cli::parse_days_before, loops::get_jrl_files, question_structs::{QuestionType, Informative, ChunkParser, PromptQuestionType}};
 
 const JRL_DIR_NAME: &str = ".jrl";
 const QUESTION_FILE_NAME: &str = "questions.txt";
@@ -57,26 +58,61 @@ fn main() -> rustyline::Result<()> {
         let all_files = get_jrl_files(&jrl_dir_path)?;
         let recent_entries = &all_files[all_files.len().saturating_sub(entries_number)..];
 
-        let mut best_rating: f64;
-        let mut best_rating: QuestionChunk;
-
-        let mut this_chunk_str: String = "".to_string();
+        let mut best_rating: f64 = f64::MIN;
+        let mut best_rating_day: String = "".to_string();
+        let mut worst_rating: f64 = f64::MAX;
+        let mut worst_rating_day: String = "".to_string();
 
         for file in recent_entries {
             let  file_content = fs::read_to_string(file)?;
             let mut lines = file_content.lines().peekable();
+
+            let mut final_file_rating: Option<f64> = None;
+
             loop {
                 match pager::get_next_chunk(&mut lines) {
                     Ok(this_chunk) => {
+                        let chunk_type = this_chunk.get_type().unwrap_or_else(|_| { QuestionType::Empty});
+                        let prompt_type = this_chunk.get_prompt_type()?;
 
+                        if prompt_type == PromptQuestionType::Rating {
+
+                            match this_chunk.get_answer()?[0].get_text()?.as_str().parse::<f64>() {
+                                Ok(rating) => {
+                                    final_file_rating = Some(rating);
+                                }
+                                Err(_) => {}
+                            }
+                        }
+                        
                     }
+                    Err(pager::ChunkError::UnexpectedFileEnd) => {
+                        break;
+                    }
+                    Err(_) => { }
+                }
+            }
 
-                    Err(_) => {
-
+            if let Some(file_rating) = final_file_rating{
+                if file_rating > best_rating{
+                    best_rating = file_rating;
+                    if let Some(file_name) = file.file_stem(){
+                        best_rating_day = file_name.to_string_lossy().to_string();
+                        best_rating_day = best_rating_day.replace("-", ".");
+                    }
+                }
+                if file_rating < worst_rating{
+                    worst_rating = file_rating;
+                    if let Some(file_name) = file.file_stem() {
+                        worst_rating_day = file_name.to_string_lossy().to_string();
+                        worst_rating_day = worst_rating_day.replace("-", ".");
                     }
                 }
             }
         }
+
+        println!("{} was your best day with {} rating", best_rating_day, best_rating);
+        println!("{} was your worst day with {} rating", worst_rating_day, worst_rating);
 
         return Ok(());
     }
