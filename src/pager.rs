@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, io::{self, Write}};
+use std::{collections::BTreeMap, io::{Write}};
 
 use crossterm::{
     cursor, execute, queue,
@@ -22,7 +22,6 @@ pub fn get_next_chunk(lines: &mut std::iter::Peekable<std::str::Lines<'_>>) -> R
 
     while let Some(line) = lines.next() {
         if !line.is_empty() {
-            eprintln!("line: {}", line);
             this_chunk_str += line;
             this_chunk_str += "\n";
         } 
@@ -31,7 +30,6 @@ pub fn get_next_chunk(lines: &mut std::iter::Peekable<std::str::Lines<'_>>) -> R
         }
         if lines.peek().is_none() || line.is_empty()  {
             this_chunk_str = this_chunk_str.trim().to_string();
-            eprintln!("{}", this_chunk_str);
             let this_chunk = QuestionChunk::from(this_chunk_str.clone());
 
             // todo replace get_type with a check_chunk
