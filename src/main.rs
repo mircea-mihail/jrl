@@ -63,10 +63,14 @@ fn main() -> rustyline::Result<()> {
         let mut worst_rating: f64 = f64::MAX;
         let mut worst_rating_day: String = "".to_string();
 
+        let mut best_description: String = "".to_string();
+        let mut worst_description: String = "".to_string();
+
         for file in recent_entries {
             let  file_content = fs::read_to_string(file)?;
             let mut lines = file_content.lines().peekable();
 
+            let mut description: String = "".to_string();
             let mut final_file_rating: Option<f64> = None;
 
             loop {
@@ -74,6 +78,8 @@ fn main() -> rustyline::Result<()> {
                     Ok(this_chunk) => {
                         let chunk_type = this_chunk.get_type().unwrap_or_else(|_| { QuestionType::Empty});
                         let prompt_type = this_chunk.get_prompt_type()?;
+                        let mut answer_iter = this_chunk.get_answer()?.into_iter();
+                        let info = this_chunk.get_informative()?.get_text()?;
 
                         if prompt_type == PromptQuestionType::Rating {
 
@@ -84,6 +90,15 @@ fn main() -> rustyline::Result<()> {
                                 Err(_) => {}
                             }
                         }
+                        else if prompt_type == PromptQuestionType::Description {
+                            if let Some(question) = answer_iter.next() {
+                                description += format!("    [{}] {}", info, question.get_text()?).as_str();
+                            }
+
+                            while let Some(question) = answer_iter.next() {
+                                description += format!("{}", question.get_text()?).as_str();
+                            }
+                        } 
                         
                     }
                     Err(pager::ChunkError::UnexpectedFileEnd) => {
@@ -99,6 +114,7 @@ fn main() -> rustyline::Result<()> {
                     if let Some(file_name) = file.file_stem(){
                         best_rating_day = file_name.to_string_lossy().to_string();
                         best_rating_day = best_rating_day.replace("-", ".");
+                        best_description = description.clone();
                     }
                 }
                 if file_rating < worst_rating{
@@ -106,13 +122,17 @@ fn main() -> rustyline::Result<()> {
                     if let Some(file_name) = file.file_stem() {
                         worst_rating_day = file_name.to_string_lossy().to_string();
                         worst_rating_day = worst_rating_day.replace("-", ".");
+                        worst_description = description.clone();
                     }
                 }
             }
         }
 
         println!("{} was your best day with {} rating", best_rating_day, best_rating);
-        println!("{} was your worst day with {} rating", worst_rating_day, worst_rating);
+        println!("{}", best_description);
+
+        println!("\n{} was your worst day with {} rating", worst_rating_day, worst_rating);
+        println!("{}", worst_description);
 
         return Ok(());
     }
