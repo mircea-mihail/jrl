@@ -60,11 +60,15 @@ fn main() -> rustyline::Result<()> {
 
         let mut best_rating: f64 = f64::MIN;
         let mut best_rating_day: String = "".to_string();
+        
         let mut worst_rating: f64 = f64::MAX;
         let mut worst_rating_day: String = "".to_string();
 
         let mut best_description: String = "".to_string();
         let mut worst_description: String = "".to_string();
+
+        let mut average_rating: f64 = 0.0;
+        let mut files_rated: f64 = 0.0;
 
         for file in recent_entries {
             let  file_content = fs::read_to_string(file)?;
@@ -108,7 +112,11 @@ fn main() -> rustyline::Result<()> {
                 }
             }
 
+
             if let Some(file_rating) = final_file_rating{
+                files_rated += 1.0;
+                average_rating += file_rating;
+                
                 if file_rating > best_rating{
                     best_rating = file_rating;
                     if let Some(file_name) = file.file_stem(){
@@ -127,6 +135,8 @@ fn main() -> rustyline::Result<()> {
                 }
             }
         }
+        let average_rating = average_rating / files_rated;
+        println!("Average day rating: {:.2}\n", average_rating);
 
         println!("{} was your best day with {} rating", best_rating_day, best_rating);
         println!("{}", best_description);
