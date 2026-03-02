@@ -52,9 +52,9 @@ fn main() -> rustyline::Result<()> {
     }
 
     if cli::show_analytics() {
-        println!("Analytics for the past 30 entries:\n");
-
         let entries_number = 30;
+        println!("Analytics for the past {} entries:\n", entries_number);
+
         let all_files = get_jrl_files(&jrl_dir_path)?;
         let recent_entries = &all_files[all_files.len().saturating_sub(entries_number)..];
 
@@ -135,14 +135,23 @@ fn main() -> rustyline::Result<()> {
                 }
             }
         }
-        let average_rating = average_rating / files_rated;
-        println!("Average day rating: {:.2}\n", average_rating);
+        if best_rating == f64::MIN {
+            println!("No ratings given for the past {} days", entries_number);
+        }
+        else if best_rating == worst_rating {
+            println!("{} was your best and worst day with {} rating", best_rating_day, best_rating);
+            println!("{}", best_description);
+        }
+        else {
+            let average_rating = average_rating / files_rated;
+            println!("Average day rating: {:.2}\n", average_rating);
 
-        println!("{} was your best day with {} rating", best_rating_day, best_rating);
-        println!("{}", best_description);
+            println!("{} was your best day with {} rating", best_rating_day, best_rating);
+            println!("{}", best_description);
 
-        println!("\n{} was your worst day with {} rating", worst_rating_day, worst_rating);
-        println!("{}", worst_description);
+            println!("\n{} was your worst day with {} rating", worst_rating_day, worst_rating);
+            println!("{}", worst_description);
+        }
 
         return Ok(());
     }
