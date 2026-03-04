@@ -52,11 +52,10 @@ fn main() -> rustyline::Result<()> {
     }
 
     if cli::show_analytics() {
-        let entries_number = 30;
-        println!("Analytics for the past {} entries:\n", entries_number);
+        let entries_to_consider = 30;
 
         let all_files = get_jrl_files(&jrl_dir_path)?;
-        let recent_entries = &all_files[all_files.len().saturating_sub(entries_number)..];
+        let recent_entries = &all_files[all_files.len().saturating_sub(entries_to_consider)..];
 
         let mut best_rating: f64 = f64::MIN;
         let mut best_rating_day: String = "".to_string();
@@ -70,8 +69,11 @@ fn main() -> rustyline::Result<()> {
         let mut average_rating: f64 = 0.0;
         let mut files_rated: f64 = 0.0;
 
+        let mut entries_number = 0;
+
         for file in recent_entries {
             let  file_content = fs::read_to_string(file)?;
+            entries_number += 1;
             let mut lines = file_content.lines().peekable();
 
             let mut description: String = "".to_string();
@@ -135,21 +137,23 @@ fn main() -> rustyline::Result<()> {
                 }
             }
         }
+        println!("Analytics for the past {} entries:\n", entries_number);
+
         if best_rating == f64::MIN {
-            println!("No ratings given for the past {} days", entries_number);
+            println!("No ratings given for the past {} days.", entries_number);
         }
         else if best_rating == worst_rating {
-            println!("{} was your best and worst day with {} rating", best_rating_day, best_rating);
+            println!("{} was your best and worst day with {} rating:", best_rating_day, best_rating);
             println!("{}", best_description);
         }
         else {
             let average_rating = average_rating / files_rated;
             println!("Average day rating: {:.2}\n", average_rating);
 
-            println!("{} was your best day with {} rating", best_rating_day, best_rating);
+            println!("{} was your best day with {} rating:", best_rating_day, best_rating);
             println!("{}", best_description);
 
-            println!("\n{} was your worst day with {} rating", worst_rating_day, worst_rating);
+            println!("\n{} was your worst day with {} rating:", worst_rating_day, worst_rating);
             println!("{}", worst_description);
         }
 
