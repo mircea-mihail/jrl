@@ -14,7 +14,7 @@ const DEFAULT_RATING: &str = "1212.1212";
 const DEFAULT_SOMETIMES: &str = "true";
 const DEFAULT_ENTRIES: &str = "true";
 const DEFAULT_UPDATE_QUESTIONS: &str = "true";
-const DEFAULT_ANALYTICS: &str = "true";
+const DEFAULT_ANALYTICS: &str = "30";
 
 const QUESTION_CHANCE: f64 = 0.5;
 
@@ -85,7 +85,7 @@ pub struct Cli {
         num_args = 0..=1,
         default_missing_value = DEFAULT_ANALYTICS
     )]
-    analytics: Option<bool>,
+    analytics: Option<usize>,
 }
 
 pub fn install_questions() -> bool {
@@ -102,18 +102,17 @@ pub fn install_questions() -> bool {
     install_questions
 }
 
-pub fn show_analytics() -> bool {
+pub fn show_analytics() -> Option<usize> {
     let args = Cli::parse();
 
-    let mut show_analytics: bool = false;
     match args.analytics {
         Some(s) => {
-            show_analytics = s;
+            return Some(s);
         }
-        None => (),
+        None => {
+            return None;
+        },
     }
-
-    show_analytics
 }
 
 pub fn parse_days_before() -> i64 {

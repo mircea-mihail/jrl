@@ -51,10 +51,9 @@ fn main() -> rustyline::Result<()> {
         }
     }
 
-    if cli::show_analytics() {
-        let entries_to_consider = 30;
-
+    if let Some(entries_to_consider) = cli::show_analytics() {
         let all_files = get_jrl_files(&jrl_dir_path)?;
+
         let recent_entries = &all_files[all_files.len().saturating_sub(entries_to_consider)..];
 
         let mut best_rating: f64 = f64::MIN;
