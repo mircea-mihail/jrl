@@ -21,13 +21,14 @@ use std::fs;
 use std::fs::OpenOptions;
 
 use crate::{cli::parse_days_before, loops::get_jrl_files, question_structs::{QuestionType, Informative, ChunkParser, PromptQuestionType}};
-
-const JRL_DIR_NAME: &str = ".jrl";
-const QUESTION_FILE_NAME: &str = "questions.txt";
+use std::{collections::BTreeMap, io::{Write}};
 
 use crossterm::{execute, terminal};
 use rustyline::error::ReadlineError;
 use std::io;
+
+const JRL_DIR_NAME: &str = ".jrl";
+const QUESTION_FILE_NAME: &str = "questions.txt";
 
 fn main() -> rustyline::Result<()> {
     let mut jrl_dir_path = home::home_dir().expect("Could not find home directory");
@@ -52,6 +53,7 @@ fn main() -> rustyline::Result<()> {
     }
 
     if let Some(entries_to_consider) = cli::show_analytics() {
+        let word_dict: BTreeMap<String, i64>= BTreeMap::new();
         let all_files = get_jrl_files(&jrl_dir_path)?;
 
         let recent_entries = &all_files[all_files.len().saturating_sub(entries_to_consider)..];
