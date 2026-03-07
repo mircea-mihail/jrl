@@ -53,7 +53,7 @@ fn main() -> rustyline::Result<()> {
     }
 
     if let Some(entries_to_consider) = cli::show_analytics() {
-        let word_dict: BTreeMap<String, i64>= BTreeMap::new();
+        let mut word_dict: BTreeMap<String, i64>= BTreeMap::new();
         let all_files = get_jrl_files(&jrl_dir_path)?;
 
         let recent_entries = &all_files[all_files.len().saturating_sub(entries_to_consider)..];
@@ -76,6 +76,16 @@ fn main() -> rustyline::Result<()> {
             let  file_content = fs::read_to_string(file)?;
             entries_number += 1;
             let mut lines = file_content.lines().peekable();
+
+            let file_words = file_content.split(|c: char| !c.is_alphanumeric())
+                .filter(|s| !s.is_empty());
+
+            for word in file_words {
+                let lower_word = word.to_lowercase();
+                word_dict.entry(lower_word.to_string())
+                    .and_modify(|i| *i += 1)
+                    .or_insert(1);
+            }
 
             let mut description: String = "".to_string();
             let mut final_file_rating: Option<f64> = None;
@@ -156,6 +166,26 @@ fn main() -> rustyline::Result<()> {
 
             println!("\n{} was your worst day with {} rating:", worst_rating_day, worst_rating);
             println!("{}", worst_description);
+        }
+
+        let max_word_len = 20;
+        let mut most_common_words: Vec<(&str, i64)> = vec![("", 0); max_word_len + 1];
+        
+        for (word, count) in word_dict.iter() {
+            let word_len = word.len();
+            if word_len > 0 && word_len <= max_word_len{
+                if most_common_words[word_len].1 < *count {
+                    most_common_words[word_len] = (word, *count);
+                }
+            }
+        }
+
+        println!("\n");
+        for i in 0..max_word_len {
+            let (word, len) = most_common_words[i];
+            if len != 0 {
+                println!("Most common {} letter word was {}, used {} times", i, word, len); 
+            }
         }
 
         return Ok(());
