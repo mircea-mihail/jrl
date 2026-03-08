@@ -21,7 +21,7 @@ use std::fs;
 use std::fs::OpenOptions;
 
 use crate::{cli::parse_days_before, loops::get_jrl_files, question_structs::{QuestionType, Informative, ChunkParser, PromptQuestionType}};
-use std::{collections::BTreeMap, io::{Write}};
+use std::{collections::BTreeMap};
 
 use crossterm::{execute, terminal};
 use rustyline::error::ReadlineError;
@@ -77,27 +77,36 @@ fn main() -> rustyline::Result<()> {
             entries_number += 1;
             let mut lines = file_content.lines().peekable();
 
-            let file_words = file_content.split(|c: char| !c.is_alphanumeric())
-                .filter(|s| !s.is_empty());
-
-            for word in file_words {
-                let lower_word = word.to_lowercase();
-                word_dict.entry(lower_word.to_string())
-                    .and_modify(|i| *i += 1)
-                    .or_insert(1);
-            }
-
             let mut description: String = "".to_string();
             let mut final_file_rating: Option<f64> = None;
 
             loop {
                 match pager::get_next_chunk(&mut lines) {
                     Ok(this_chunk) => {
+                        // collect statistics on answer words (how often they are used)
+                        let answer_vec = this_chunk.get_answer()?;
+                        let mut answer_words: Vec<String> = Vec::new(); 
+                        for question in answer_vec {
+                            let line_words = question
+                                .question
+                                .split(|c: char| !c.is_alphanumeric())
+                                .filter(|s| !s.is_empty())
+                                .map(|s| s.to_string());
+
+                            answer_words.extend(line_words);
+                        }
+                        for word in answer_words {
+                            let lower_word = word.to_lowercase();
+                            word_dict.entry(lower_word.to_string())
+                                .and_modify(|i| *i += 1)
+                                .or_insert(1);
+                        }
+
+                        // see which days were the best/worst and store the rating and description
                         let chunk_type = this_chunk.get_type().unwrap_or_else(|_| { QuestionType::Empty});
                         let prompt_type = this_chunk.get_prompt_type()?;
                         let mut answer_iter = this_chunk.get_answer()?.into_iter();
                         let info = this_chunk.get_informative()?.get_text()?;
-
                         if prompt_type == PromptQuestionType::Rating {
 
                             match this_chunk.get_answer()?[0].get_text()?.as_str().parse::<f64>() {
