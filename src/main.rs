@@ -60,12 +60,15 @@ fn main() -> rustyline::Result<()> {
 
         let mut best_rating: f64 = f64::MIN;
         let mut best_rating_day: String = "".to_string();
+        let mut best_description: String = "".to_string();
         
         let mut worst_rating: f64 = f64::MAX;
         let mut worst_rating_day: String = "".to_string();
-
-        let mut best_description: String = "".to_string();
         let mut worst_description: String = "".to_string();
+
+        let mut longest_text_rating: f64 = f64::MIN;
+        let mut longest_text_day: String = "".to_string();
+        let mut longest_description: String = "".to_string();
 
         let mut average_rating: f64 = 0.0;
         let mut files_rated: f64 = 0.0;
@@ -122,10 +125,9 @@ fn main() -> rustyline::Result<()> {
                             }
 
                             while let Some(question) = answer_iter.next() {
-                                description += format!("{}", question.get_text()?).as_str();
+                                description += format!("\n    {}", question.get_text()?).as_str();
                             }
                         } 
-                        
                     }
                     Err(pager::ChunkError::UnexpectedFileEnd) => {
                         break;
@@ -144,18 +146,29 @@ fn main() -> rustyline::Result<()> {
                     if let Some(file_name) = file.file_stem(){
                         best_rating_day = file_name.to_string_lossy().to_string();
                         best_rating_day = best_rating_day.replace("-", ".");
-                        best_description = description.clone();
                     }
+                    best_description = description.clone();
                 }
                 if file_rating < worst_rating{
                     worst_rating = file_rating;
                     if let Some(file_name) = file.file_stem() {
                         worst_rating_day = file_name.to_string_lossy().to_string();
                         worst_rating_day = worst_rating_day.replace("-", ".");
-                        worst_description = description.clone();
                     }
+                    worst_description = description.clone();
                 }
             }
+            if description.len() > longest_description.len() {
+                if let Some(file_rating) = final_file_rating {
+                    longest_text_rating = file_rating;
+                }
+                if let Some(file_name) = file.file_stem() {
+                    longest_text_day = file_name.to_string_lossy().to_string();
+                    longest_text_day = longest_text_day.replace("-", ".");
+                }
+                longest_description = description.clone();
+            }
+            
         }
         println!("Analytics for the past {} entries:\n", entries_number);
 
@@ -196,6 +209,9 @@ fn main() -> rustyline::Result<()> {
                 println!("Most common {} letter word was {}, used {} times", i, word, len); 
             }
         }
+
+        println!("\n{} was your longest input day with {} rating:", longest_text_day, longest_text_rating);
+        println!("{}", longest_description);
 
         return Ok(());
     }
