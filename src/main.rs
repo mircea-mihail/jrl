@@ -202,7 +202,6 @@ fn main() -> rustyline::Result<()> {
             }
         }
 
-        println!("\n");
         for i in 0..max_word_len {
             let (word, len) = most_common_words[i];
             if len != 0 {
