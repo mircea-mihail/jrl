@@ -58,15 +58,15 @@ fn main() -> rustyline::Result<()> {
 
         let recent_entries = &all_files[all_files.len().saturating_sub(entries_to_consider)..];
 
-        let mut best_rating: f64 = f64::MIN;
+        let mut best_rating_opt: Option<f64> = None;
         let mut best_rating_day: String = "".to_string();
         let mut best_description: String = "".to_string();
         
-        let mut worst_rating: f64 = f64::MAX;
+        let mut worst_rating_opt: Option<f64> = None;
         let mut worst_rating_day: String = "".to_string();
         let mut worst_description: String = "".to_string();
 
-        let mut longest_text_rating: f64 = f64::MIN;
+        let mut longest_text_rating_opt: Option<f64> = None;
         let mut longest_text_day: String = "".to_string();
         let mut longest_description: String = "".to_string();
 
@@ -81,7 +81,7 @@ fn main() -> rustyline::Result<()> {
             let mut lines = file_content.lines().peekable();
 
             let mut description: String = "".to_string();
-            let mut final_file_rating: Option<f64> = None;
+            let mut final_file_rating_opt: Option<f64> = None;
 
             loop {
                 match pager::get_next_chunk(&mut lines) {
@@ -114,7 +114,7 @@ fn main() -> rustyline::Result<()> {
 
                             match this_chunk.get_answer()?[0].get_text()?.as_str().parse::<f64>() {
                                 Ok(rating) => {
-                                    final_file_rating = Some(rating);
+                                    final_file_rating_opt = Some(rating);
                                 }
                                 Err(_) => {}
                             }
@@ -137,20 +137,20 @@ fn main() -> rustyline::Result<()> {
             }
 
 
-            if let Some(file_rating) = final_file_rating{
+            if let Some(file_rating) = final_file_rating_opt{
                 files_rated += 1.0;
                 average_rating += file_rating;
                 
-                if file_rating > best_rating{
-                    best_rating = file_rating;
+                if best_rating_opt.map_or(true, |r| r < file_rating) {
+                    best_rating_opt= Some(file_rating);
                     if let Some(file_name) = file.file_stem(){
                         best_rating_day = file_name.to_string_lossy().to_string();
                         best_rating_day = best_rating_day.replace("-", ".");
                     }
                     best_description = description.clone();
                 }
-                if file_rating < worst_rating{
-                    worst_rating = file_rating;
+                if worst_rating_opt.map_or(true,  | r| r > file_rating) {
+                    worst_rating_opt = Some(file_rating);
                     if let Some(file_name) = file.file_stem() {
                         worst_rating_day = file_name.to_string_lossy().to_string();
                         worst_rating_day = worst_rating_day.replace("-", ".");
@@ -159,8 +159,8 @@ fn main() -> rustyline::Result<()> {
                 }
             }
             if description.len() > longest_description.len() {
-                if let Some(file_rating) = final_file_rating {
-                    longest_text_rating = file_rating;
+                if let file_rating= final_file_rating_opt {
+                    longest_text_rating_opt = file_rating;
                 }
                 if let Some(file_name) = file.file_stem() {
                     longest_text_day = file_name.to_string_lossy().to_string();
@@ -172,23 +172,30 @@ fn main() -> rustyline::Result<()> {
         }
         println!("Analytics for the past {} entries:\n", entries_number);
 
-        if best_rating == f64::MIN {
+        if best_rating_opt == None { 
             println!("No ratings given for the past {} days.", entries_number);
         }
-        else if best_rating == worst_rating {
-            println!("{} was your best and worst day with {} rating:", best_rating_day, best_rating);
-            println!("{}", best_description);
+        else if best_rating_opt == worst_rating_opt {
+            if let Some(best_rating) = best_rating_opt{
+                println!("{} was your best and worst day with {} rating:", best_rating_day, best_rating);
+                println!("{}", best_description);
+            }
         }
         else {
             let average_rating = average_rating / files_rated;
             println!("Average day rating: {:.2}\n", average_rating);
 
-            println!("{} was your best day with {} rating:", best_rating_day, best_rating);
-            println!("{}", best_description);
+            if let Some(best_rating) = best_rating_opt{
+                println!("{} was your best day with {} rating:", best_rating_day, best_rating);
+                println!("{}", best_description);
+            }
 
-            println!("\n{} was your worst day with {} rating:", worst_rating_day, worst_rating);
-            println!("{}", worst_description);
+            if let Some(worst_rating) = worst_rating_opt{
+                println!("\n{} was your worst day with {} rating:", worst_rating_day, worst_rating);
+                println!("{}", worst_description);
+            }
         }
+        println!("");
 
         let max_word_len = 20;
         let mut most_common_words: Vec<(&str, i64)> = vec![("", 0); max_word_len + 1];
@@ -208,9 +215,14 @@ fn main() -> rustyline::Result<()> {
                 println!("Most common {} letter word was {}, used {} times", i, word, len); 
             }
         }
-
-        println!("\n{} was your longest input day with {} rating:", longest_text_day, longest_text_rating);
-        println!("{}", longest_description);
+        if let Some(longest_text_rating) = longest_text_rating_opt {
+            println!("\n{} was your longest input day with {} rating:", longest_text_day, longest_text_rating);
+            println!("{}", longest_description);
+        }
+        else{
+            println!("\n{} was your longest input day:", longest_text_day);
+            println!("{}", longest_description);
+        }
 
         return Ok(());
     }
