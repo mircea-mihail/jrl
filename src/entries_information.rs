@@ -1,4 +1,4 @@
-use crate::{cli::parse_days_before, entries_information, loops::get_jrl_files, question_structs::{ChunkParser, Informative, PromptQuestionType, QuestionType}};
+use crate::{loops::get_jrl_files, question_structs::{ChunkParser, Informative, PromptQuestionType}};
 use std::{collections::BTreeMap, path::PathBuf};
 use std::io;
 use std::fs;
@@ -58,7 +58,7 @@ pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::
                     }
 
                     // see which days were the best/worst and store the rating and description
-                    let chunk_type = this_chunk.get_type().unwrap_or_else(|_| { QuestionType::Empty});
+                    // let chunk_type = this_chunk.get_type().unwrap_or_else(|_| { QuestionType::Empty});
                     let prompt_type = this_chunk.get_prompt_type()?;
                     let mut answer_iter = this_chunk.get_answer()?.into_iter();
                     let info = this_chunk.get_informative()?.get_text()?;
@@ -73,7 +73,7 @@ pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::
                     }
                     else if prompt_type == PromptQuestionType::Description {
                         if let Some(question) = answer_iter.next() {
-                            description += format!("    [{}] {}", info, question.get_text()?).as_str();
+                            description += format!("\n    [{}] {}", info, question.get_text()?).as_str();
                         }
 
                         while let Some(question) = answer_iter.next() {
@@ -88,7 +88,7 @@ pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::
             }
         }
 
-
+        description = pager::parse_display_text(&description)?.join("\n");
         if let Some(file_rating) = final_file_rating_opt{
             files_rated += 1.0;
             average_rating += file_rating;
@@ -141,11 +141,10 @@ pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::
         }
 
         if let Some(worst_rating) = worst_rating_opt{
-            println!("\n{} was your worst day with {} rating:", worst_rating_day, worst_rating);
+            println!("{} was your worst day with {} rating:", worst_rating_day, worst_rating);
             println!("{}", worst_description);
         }
     }
-    println!("");
 
     let max_word_len = 20;
     let mut most_common_words: Vec<(&str, i64)> = vec![("", 0); max_word_len + 1];
