@@ -72,7 +72,7 @@ pub fn format_content(content: &String) -> std::io::Result<String> {
                     }
 
                     while let Some(question) = answer_iter.next() {
-                        descriptions.push(format!("{}", question.get_text()?));
+                        descriptions.push(format!("  {}", question.get_text()?));
                     }
                 } 
                 else if prompt_type == PromptQuestionType::Note {
@@ -80,7 +80,7 @@ pub fn format_content(content: &String) -> std::io::Result<String> {
                         notes.push(format!("    [{}] {}", info, question.get_text()?));
                     }
                     while let Some(question) = answer_iter.next() {
-                        notes.push(format!("{}", question.get_text()?));
+                        notes.push(format!("  {}", question.get_text()?));
                     }
                 } 
                 else if chunk_type == QuestionType::Long {

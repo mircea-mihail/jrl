@@ -77,7 +77,7 @@ pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::
                         }
 
                         while let Some(question) = answer_iter.next() {
-                            description += format!("\n    {}", question.get_text()?).as_str();
+                            description += format!("\n  {}", question.get_text()?).as_str();
                         }
                     } 
                 }
