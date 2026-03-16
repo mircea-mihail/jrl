@@ -93,7 +93,7 @@ pub fn format_content(content: &String) -> std::io::Result<String> {
                     }
 
                     while let Some(question) = answer_iter.next() {
-                        let answer_line = format!("\n{}", question.get_text()?); 
+                        let answer_line = format!("\n  {}", question.get_text()?); 
                         answer += answer_line.as_str();
                     }
 
