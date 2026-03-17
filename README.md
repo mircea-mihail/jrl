@@ -120,3 +120,17 @@ $ jrl -a | less
 Analytics for the past 30 entries:
 ...
 ```
+
+## Interactive mode
+
+You can enter interactive mode with the following command:
+
+```bash
+$ jrl -e
+```
+
+This is a pager like interface to browse through all of your journal entries. To move up, down and to the next or previous files you can use the arrow keys, or using the classic vi layout, with the keys ```h```, ```j```, ```k``` and ```l```. You can also move down by pressing ```Enter``` and down by pressing ```Backspace```. 
+
+To go directly to the top of the file press ```g``` and to go to the bottom press ```G```. 
+
+To exit interactive mode press ```q``` or ```Esc```. 
