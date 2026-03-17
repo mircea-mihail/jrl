@@ -146,6 +146,15 @@ pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::
         }
     }
 
+    if let Some(longest_text_rating) = longest_text_rating_opt {
+        println!("{} was your longest input day with {} rating:", longest_text_day, longest_text_rating);
+        println!("{}", longest_description);
+    }
+    else{
+        println!("\n{} was your longest input day:", longest_text_day);
+        println!("{}", longest_description);
+    }
+
     let max_word_len = 20;
     let mut most_common_words: Vec<(&str, i64)> = vec![("", 0); max_word_len + 1];
     
@@ -157,21 +166,11 @@ pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::
             }
         }
     }
-
     for i in 0..max_word_len {
         let (word, len) = most_common_words[i];
         if len != 0 {
             println!("Most common {} letter word was {}, used {} times", i, word, len); 
         }
     }
-    if let Some(longest_text_rating) = longest_text_rating_opt {
-        println!("\n{} was your longest input day with {} rating:", longest_text_day, longest_text_rating);
-        println!("{}", longest_description);
-    }
-    else{
-        println!("\n{} was your longest input day:", longest_text_day);
-        println!("{}", longest_description);
-    }
-
     Ok(())
 }
