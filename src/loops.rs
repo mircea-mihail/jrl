@@ -101,26 +101,26 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
     execute!(stdout, terminal::EnterAlternateScreen)?;
 
     let mut file_content = fs::read_to_string(&journal_paths[file_index])?;
-    let mut formatted_content =
+    let mut parsed_content =
         pager::parse_date_file(&file_content).unwrap_or(ERROR_PARSING_FILE.to_string());
-    let mut terminal_lines = pager::format_content(&formatted_content)?;
+    let mut formatted_content = pager::format_content(&parsed_content)?;
 
     pager::write_display_content(
         &journal_paths[file_index],
         height_index,
-        &terminal_lines,
+        &formatted_content,
         &stdout,
     )?;
 
     loop {
         let event = event::read()?;
         if let Event::Resize(_, _) = event {
-            terminal_lines = pager::format_content(&formatted_content)?;
+            formatted_content = pager::format_content(&parsed_content)?;
 
             pager::write_display_content(
                 &journal_paths[file_index],
                 height_index,
-                &terminal_lines,
+                &formatted_content,
                 &stdout,
             )?;
         }
@@ -140,7 +140,7 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
                 }
                 KeyCode::Char('j') | KeyCode::Down | KeyCode::Enter=> {
                     let (_, term_height) = terminal::size()?;
-                    if terminal_lines.len() - height_index >= term_height as usize {
+                    if formatted_content.len() - height_index >= term_height as usize {
                         height_index += 1;
                         height_changed = true;
                     }
@@ -153,8 +153,8 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
                 }
                 KeyCode::Char('G') => {
                     let (_, term_height) = terminal::size()?;
-                    if terminal_lines.len() > term_height as usize  {
-                        let desired_height = terminal_lines.len() + 1 - term_height as usize;
+                    if formatted_content.len() > term_height as usize  {
+                        let desired_height = formatted_content.len() + 1 - term_height as usize;
                         if height_index != desired_height {
                             height_index = desired_height;
                             height_changed = true;
@@ -177,7 +177,7 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
             pager::write_display_content(
                 &journal_paths[file_index],
                 height_index,
-                &terminal_lines,
+                &formatted_content,
                 &stdout,
             )?;
         }
@@ -188,14 +188,14 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
             height_index = 0;
 
             file_content = fs::read_to_string(&journal_paths[file_index])?;
-            formatted_content =
+            parsed_content =
                 pager::parse_date_file(&file_content).unwrap_or(ERROR_PARSING_FILE.to_string());
-            terminal_lines = pager::format_content(&formatted_content)?;
+            formatted_content = pager::format_content(&parsed_content)?;
 
             pager::write_display_content(
                 &journal_paths[file_index],
                 height_index,
-                &terminal_lines,
+                &formatted_content,
                 &stdout,
             )?;
         }
