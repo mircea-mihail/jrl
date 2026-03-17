@@ -1,5 +1,6 @@
 use std::{collections::BTreeMap, io::{Write}};
 
+use chrono::Datelike;
 use crossterm::{
     cursor, execute, queue,
     style::{self, Stylize},
@@ -217,11 +218,12 @@ pub fn write_display_content(
 
     let (_, term_height) = terminal::size()?;
     let mut line_y = 0;
-    let mut path_str = "";
+    let mut path_str: String = "".to_string();
 
     if let Some(stem_os) = path.file_stem() {
         if let Some(stem_str) = stem_os.to_str() {
-            path_str = stem_str;
+            let weekday = chrono::NaiveDate::parse_from_str(stem_str, "%Y-%m-%d").unwrap().weekday();
+            path_str = format!("{} {}", stem_str, weekday.to_string().as_str());
         }
     }
     queue!(
