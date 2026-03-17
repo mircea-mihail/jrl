@@ -15,7 +15,15 @@ $ cargo install jrl
 ```
 Or just copy the executable to /usr/local/bin.
 
-In order to replace the quesitons file used for prompts, create a questions.txt file in the current directory using the template provided in the repository, using the flags s: for short questions and l: for long ones, and run 
+Another common first step is to call the jrl executable in your config file so you get promted a new question every time you open a new terminal. This config file can be found in your home directory and a common name for it is ```.bashrc```. In order to only sometimes get asked questions you can use the -s (sometimes) flag.
+
+Add the following in your .bashrc file:
+
+```bash
+jl -s
+```
+
+In order to replace the quesitons file used for prompts, create a questions.txt file in the current directory using the template provided in the repository and run:
 
 ```bash
 $ jrl --install-questions
@@ -23,7 +31,13 @@ $ jrl --install-questions
 
 ## Questions file
 
-This file contains all the questions you want to be asked when calling jrl or when doing jrl -s in your bashrc. The short questions are meant to be answered with numbers or short text, while the long ones expect a multi line answer. One example of a question file I once used is the one below, mostly tracking health habits I was interested in at the time. Place this file in the ~/.jrl directory manually or just use the command above to do it automatically.
+This file contains all the questions you want to be asked when calling jrl or when doing jrl -s in your bashrc. Each question has 2 flags that change how long the answer from the user should be:
+  * s: for short questions
+  * l: for long ones
+
+The **short questions** are meant to be answered with numbers or short text, while the **long questions** expect a multi line answer. 
+
+One example of a question file I once used is the one below, mostly tracking health habits I was interested in at the time. Place this file in the ~/.jrl directory manually or just use the command mentioned in the previous section to do it automatically.
 
 ```
 s: Number of coffees? 
@@ -58,6 +72,7 @@ jrl [OPTIONS]
 | `-e` | `--entries` | `[<ENTRIES>]` | Show all entries into the journal [possible values: true, false]. True by default |
 | `-u` | `--update` | `<UPDATE>` | Update journal from x days ago |
 |      |  `--install-questions`| `[<INSTALL_QUESTIONS>]` | Use the questions from the questions.txt file in the current directory [possible values: true, false]. True by default |
+| `-a` | `--analytics` | `[<ANALYTICS>]` | Show analytics for the past x journal entries. 30 by default |
 | `-h` | `--help` | `-` | Print help |
 
 
@@ -67,7 +82,12 @@ jrl [OPTIONS]
 
 Most flags work either by providing the argument immediately after the flag, or by entering the flag alone and typing your input on the following lines.
 
+
 ```
+$ jrl
+Hours of sleep?
+>> 9
+
 $ jrl -d "Today was productive and calm"
 
 $ jrl -d
@@ -90,5 +110,13 @@ $ jrl -u 1 -d
 Update entry for 18 Feb 2026:
 Add a description about the day:
 >> Today was pretty cool, did some uni work in the morning then stayed late with the boys at the pub
->> 
+>>
+
+$ jrl -a 7
+Analytics for the past 7 entries:
+...
+
+$ jrl -a | less
+Analytics for the past 30 entries:
+...
 ```
