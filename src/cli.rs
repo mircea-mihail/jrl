@@ -78,7 +78,7 @@ pub struct Cli {
     )]
     install_questions: Option<bool>,
 
-    /// Show analytics for all journal entries
+    /// Show analytics for the past x journal entries. 30 by default.
     #[arg (
         short,
         long,
