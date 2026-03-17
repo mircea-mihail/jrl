@@ -42,7 +42,7 @@ pub fn get_next_chunk(lines: &mut std::iter::Peekable<std::str::Lines<'_>>) -> R
     Err(ChunkError::UnexpectedFileEnd)
 }
 
-pub fn format_content(content: &String) -> std::io::Result<String> {
+pub fn parse_date_file(content: &String) -> std::io::Result<String> {
     let mut invalid_chunks_number = 0;
     let mut notes: Vec<String> = Vec::new();
     let mut descriptions: Vec<String> = Vec::new();
@@ -169,7 +169,7 @@ pub fn format_content(content: &String) -> std::io::Result<String> {
     Ok(return_content)
 }
 
-pub fn parse_display_text(content: &String) -> std::io::Result<Vec<String>> {
+pub fn format_content(content: &String) -> std::io::Result<Vec<String>> {
     let (term_width, _) = terminal::size()?;
 
     let mut terminal_lines: Vec<String> = Vec::new();

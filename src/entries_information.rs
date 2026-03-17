@@ -88,7 +88,7 @@ pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::
             }
         }
 
-        description = pager::parse_display_text(&description)?.join("\n");
+        description = pager::format_content(&description)?.join("\n");
         if let Some(file_rating) = final_file_rating_opt{
             files_rated += 1.0;
             average_rating += file_rating;

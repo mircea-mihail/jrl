@@ -102,8 +102,8 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
 
     let mut file_content = fs::read_to_string(&journal_paths[file_index])?;
     let mut formatted_content =
-        pager::format_content(&file_content).unwrap_or(ERROR_PARSING_FILE.to_string());
-    let mut terminal_lines = pager::parse_display_text(&formatted_content)?;
+        pager::parse_date_file(&file_content).unwrap_or(ERROR_PARSING_FILE.to_string());
+    let mut terminal_lines = pager::format_content(&formatted_content)?;
 
     pager::write_display_content(
         &journal_paths[file_index],
@@ -115,7 +115,7 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
     loop {
         let event = event::read()?;
         if let Event::Resize(_, _) = event {
-            terminal_lines = pager::parse_display_text(&formatted_content)?;
+            terminal_lines = pager::format_content(&formatted_content)?;
 
             pager::write_display_content(
                 &journal_paths[file_index],
@@ -189,8 +189,8 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
 
             file_content = fs::read_to_string(&journal_paths[file_index])?;
             formatted_content =
-                pager::format_content(&file_content).unwrap_or(ERROR_PARSING_FILE.to_string());
-            terminal_lines = pager::parse_display_text(&formatted_content)?;
+                pager::parse_date_file(&file_content).unwrap_or(ERROR_PARSING_FILE.to_string());
+            terminal_lines = pager::format_content(&formatted_content)?;
 
             pager::write_display_content(
                 &journal_paths[file_index],
