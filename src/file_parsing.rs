@@ -32,19 +32,19 @@ fn generate_jumbled_questions_file(
     questions.shuffle(&mut rng);
 
     let mut file: fs::File = OpenOptions::new()
-        .write(true)
         .append(true)
-        .open(&jumbled_questions_path)?;
+        .open(jumbled_questions_path)?;
 
     for quesiton in questions {
-        file.write(quesiton.to_string().as_bytes())?;
-        file.write("\n".as_bytes())?;
+        file.write_all(quesiton.to_string().as_bytes())?;
+        file.write_all("\n".as_bytes())?;
     }
-    return Ok(());
+
+    Ok(())
 }
 
-pub fn generate_jumbled_questions_file_name() -> PathBuf{
-    let hash = xxh3_128(&utility::get_day_file_name(0).as_bytes());
+pub fn generate_jumbled_questions_file_name() -> PathBuf {
+    let hash = xxh3_128(utility::get_day_file_name(0).as_bytes());
     let hashed_string = format!("{:032x}", hash)[..15].to_string();
 
     let file_name: PathBuf = std::path::PathBuf::from("/tmp")
@@ -65,7 +65,7 @@ pub fn get_question(questions_path: &Path) -> io::Result<Question> {
         .unwrap_or(0)
         == 0
     {
-        generate_jumbled_questions_file(&questions_path, &jumbled_questions_path)?;
+        generate_jumbled_questions_file(questions_path, &jumbled_questions_path)?;
     }
 
     let all_questions = fs::read_to_string(&jumbled_questions_path)?;
@@ -88,7 +88,7 @@ pub fn get_question(questions_path: &Path) -> io::Result<Question> {
                 acc
             });
 
-    file.write(unconsumed_string.as_bytes())?;
+    file.write_all(unconsumed_string.as_bytes())?;
 
     Ok(all_questions
         .lines()
@@ -99,7 +99,7 @@ pub fn get_question(questions_path: &Path) -> io::Result<Question> {
 }
 
 pub fn exists_today_file(jrl_dir_path: &Path, today_file: &String) -> io::Result<bool> {
-    let today_file_path = jrl_dir_path.join(&today_file);
+    let today_file_path = jrl_dir_path.join(today_file);
 
     if !jrl_dir_path.is_dir() {
         match fs::create_dir(jrl_dir_path) {
@@ -120,6 +120,7 @@ pub fn exists_today_file(jrl_dir_path: &Path, today_file: &String) -> io::Result
             }
         }
     }
+
     Ok(false)
 }
 
