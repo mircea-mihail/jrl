@@ -32,7 +32,7 @@ pub fn get_input(
         let readline = rl.readline(">> ");
         match readline {
             Ok(line) => {
-                if line == "".to_string() {
+                if line.is_empty() {
                     break;
                 }
                 if !wrote_quesiton {
@@ -40,11 +40,11 @@ pub fn get_input(
                         file.write_all("\n".as_bytes())?;
                     }
 
-                    file_parsing::write_question(&file, &question)?;
+                    file_parsing::write_question(file, &question)?;
                     wrote_quesiton = true;
                 }
 
-                file_parsing::write_answer(&file, &line)?;
+                file_parsing::write_answer(file, &line)?;
 
                 if question.get_type()? == QuestionType::Short {
                     break;
@@ -62,7 +62,7 @@ pub fn get_input(
     Ok(())
 }
 
-pub fn get_jrl_files(jrl_dir_path: &std::path::PathBuf) ->  io::Result<Vec<std::path::PathBuf>>{
+pub fn get_jrl_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<Vec<std::path::PathBuf>> {
     let dir_files = fs::read_dir(jrl_dir_path)?;
     let mut journal_paths: Vec<std::path::PathBuf> = Vec::new();
 
@@ -138,7 +138,7 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
                     }
                     file_changed = true;
                 }
-                KeyCode::Char('j') | KeyCode::Down | KeyCode::Enter=> {
+                KeyCode::Char('j') | KeyCode::Down | KeyCode::Enter => {
                     let (_, term_height) = terminal::size()?;
                     if formatted_content.len() - height_index >= term_height as usize {
                         height_index += 1;
@@ -153,13 +153,12 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
                 }
                 KeyCode::Char('G') => {
                     let (_, term_height) = terminal::size()?;
-                    if formatted_content.len() > term_height as usize  {
+                    if formatted_content.len() > term_height as usize {
                         let desired_height = formatted_content.len() + 1 - term_height as usize;
                         if height_index != desired_height {
                             height_index = desired_height;
                             height_changed = true;
                         }
-    
                     }
                 }
                 KeyCode::Char('g') => {
@@ -184,7 +183,7 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
 
         if file_changed {
             file_changed = false;
-            file_index = file_index % (idx_max_len + 1);
+            file_index %= idx_max_len + 1;
             height_index = 0;
 
             file_content = fs::read_to_string(&journal_paths[file_index])?;
@@ -205,5 +204,6 @@ pub fn view_files(jrl_dir_path: &std::path::PathBuf) -> io::Result<()> {
     terminal::disable_raw_mode()?;
 
     stdout.flush()?;
-    return Ok(());
+
+    Ok(())
 }
