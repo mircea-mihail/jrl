@@ -1,8 +1,8 @@
 // implement informative for question chunk
 // do pager
 
-use std::fmt;
 use crate::cli;
+use std::fmt;
 
 const QUESTION_TYPE_TRAIL: &str = ": ";
 const QUESTION_TYPE_ERROR: &str = "question chunk does not fit the format";
@@ -47,7 +47,9 @@ impl fmt::Display for Question {
 
 impl From<&str> for Question {
     fn from(s: &str) -> Self {
-        Question { question: s.to_string() }
+        Question {
+            question: s.to_string(),
+        }
     }
 }
 
@@ -59,10 +61,11 @@ impl From<String> for QuestionChunk {
 
 impl From<&str> for QuestionChunk {
     fn from(s: &str) -> Self {
-        QuestionChunk { question_chunk: s.to_string() }
+        QuestionChunk {
+            question_chunk: s.to_string(),
+        }
     }
 }
-
 
 pub trait Informative {
     fn is_question(&self) -> std::io::Result<bool>;
@@ -70,7 +73,6 @@ pub trait Informative {
     fn get_type_as_str(&self) -> std::io::Result<String>;
     fn get_prompt_type(&self) -> std::io::Result<PromptQuestionType>;
     fn get_text(&self) -> std::io::Result<String>;
-
 }
 
 pub trait ChunkParser {
@@ -152,7 +154,7 @@ impl Informative for Question {
             return Ok(PromptQuestionType::Rating);
         }
 
-        return Ok(PromptQuestionType::Regular);
+        Ok(PromptQuestionType::Regular)
     }
 
     fn get_text(&self) -> std::io::Result<String> {
@@ -163,7 +165,6 @@ impl Informative for Question {
         let text = self.question.get(3..).unwrap_or("");
         Ok(text.to_string())
     }
-
 }
 
 impl ChunkParser for QuestionChunk {
@@ -176,7 +177,7 @@ impl ChunkParser for QuestionChunk {
         Err(std::io::Error::new(
             std::io::ErrorKind::InvalidData,
             QUESTION_TYPE_ERROR,
-        )) 
+        ))
     }
 
     fn get_question(&self) -> std::io::Result<Question> {
@@ -188,7 +189,7 @@ impl ChunkParser for QuestionChunk {
         Err(std::io::Error::new(
             std::io::ErrorKind::InvalidData,
             QUESTION_TYPE_ERROR,
-        )) 
+        ))
     }
 
     fn get_answer(&self) -> std::io::Result<Vec<Question>> {
