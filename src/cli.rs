@@ -93,7 +93,7 @@ pub fn install_questions() -> bool {
 
     let mut install_questions: bool = false;
     if let Some(s) = args.install_questions {
-            install_questions = s;
+        install_questions = s;
     }
 
     install_questions
@@ -126,8 +126,8 @@ pub fn show_entries() -> bool {
     let args = Cli::parse();
     let mut show_entries: bool = false;
 
-    if let Some(e) = args.entries &&
-        e == DEFAULT_SOMETIMES.parse::<bool>().unwrap() 
+    if let Some(e) = args.entries
+        && e == DEFAULT_SOMETIMES.parse::<bool>().unwrap()
     {
         show_entries = true;
     }
@@ -155,7 +155,7 @@ pub fn parse_args(
             return Ok(true);
         }
     }
-    if let Some(a)  = args.note {
+    if let Some(a) = args.note {
         *question = NOTE_QUESTION_STR.to_string().into();
 
         if a != DEFAULT_NOTE {
@@ -167,7 +167,7 @@ pub fn parse_args(
             return Ok(true);
         }
     }
-    if let Some(a) =  args.rating {
+    if let Some(a) = args.rating {
         *question = RATING_QUESTION_STR.to_string().into();
 
         if a != DEFAULT_RATING.parse::<f64>().unwrap() {
@@ -179,8 +179,8 @@ pub fn parse_args(
             return Ok(true);
         }
     }
-    if let Some(s) = args.sometimes &&
-        s == DEFAULT_SOMETIMES.parse::<bool>().unwrap() 
+    if let Some(s) = args.sometimes
+        && s == DEFAULT_SOMETIMES.parse::<bool>().unwrap()
     {
         *question_chance = QUESTION_CHANCE;
     }
