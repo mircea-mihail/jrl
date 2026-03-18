@@ -92,11 +92,8 @@ pub fn install_questions() -> bool {
     let args = Cli::parse();
 
     let mut install_questions: bool = false;
-    match args.install_questions {
-        Some(s) => {
+    if let Some(s) = args.install_questions {
             install_questions = s;
-        }
-        None => (),
     }
 
     install_questions
@@ -105,32 +102,21 @@ pub fn install_questions() -> bool {
 pub fn show_analytics() -> Option<usize> {
     let args = Cli::parse();
 
-    match args.analytics {
-        Some(s) => {
-            return Some(s);
-        }
-        None => {
-            return None;
-        },
-    }
+    args.analytics
 }
 
 pub fn parse_days_before() -> i64 {
     let args = Cli::parse();
 
     let mut days_before_today: i64 = 0;
-    match args.update {
-        Some(s) => {
-            days_before_today = s;
+    if let Some(s) = args.update {
+        days_before_today = s;
 
-            println!(
-                "Update entry for {}:",
-                (chrono::offset::Local::now() - chrono::Duration::days(days_before_today))
-                    .format("%d %b %Y")
-                    .to_string()
-            );
-        }
-        None => (),
+        println!(
+            "Update entry for {}:",
+            (chrono::offset::Local::now() - chrono::Duration::days(days_before_today))
+                .format("%d %b %Y")
+        );
     }
 
     days_before_today
@@ -139,11 +125,12 @@ pub fn parse_days_before() -> i64 {
 pub fn show_entries() -> bool {
     let args = Cli::parse();
     let mut show_entries: bool = false;
-    args.entries.map(|e: bool| {
-        if e == DEFAULT_SOMETIMES.parse::<bool>().unwrap() {
-            show_entries = true;
-        }
-    });
+
+    if let Some(e) = args.entries &&
+        e == DEFAULT_SOMETIMES.parse::<bool>().unwrap() 
+    {
+        show_entries = true;
+    }
 
     show_entries
 }
@@ -156,56 +143,47 @@ pub fn parse_args(
 ) -> std::io::Result<bool> {
     let args = Cli::parse();
 
-    match args.description {
-        Some(a) => {
-            *question = DESCRIPTION_QUESTION_STR.to_string().into();
+    if let Some(a) = args.description {
+        *question = DESCRIPTION_QUESTION_STR.to_string().into();
 
-            if a != DEFAULT_DESCRIPTION {
-                if *write_question_gap {
-                    file.write_all("\n".as_bytes())?;
-                }
-                file_parsing::write_question(&file, &question)?;
-                file_parsing::write_answer(&file, &a)?;
-                return Ok(true);
+        if a != DEFAULT_DESCRIPTION {
+            if *write_question_gap {
+                file.write_all("\n".as_bytes())?;
             }
+            file_parsing::write_question(file, question)?;
+            file_parsing::write_answer(file, &a)?;
+            return Ok(true);
         }
-        None => (),
     }
-    match args.note {
-        Some(a) => {
-            *question = NOTE_QUESTION_STR.to_string().into();
+    if let Some(a)  = args.note {
+        *question = NOTE_QUESTION_STR.to_string().into();
 
-            if a != DEFAULT_NOTE {
-                if *write_question_gap {
-                    file.write_all("\n".as_bytes())?;
-                }
-                file_parsing::write_question(&file, &question)?;
-                file_parsing::write_answer(&file, &a)?;
-                return Ok(true);
+        if a != DEFAULT_NOTE {
+            if *write_question_gap {
+                file.write_all("\n".as_bytes())?;
             }
+            file_parsing::write_question(file, question)?;
+            file_parsing::write_answer(file, &a)?;
+            return Ok(true);
         }
-        None => (),
     }
-    match args.rating {
-        Some(a) => {
-            *question = RATING_QUESTION_STR.to_string().into();
+    if let Some(a) =  args.rating {
+        *question = RATING_QUESTION_STR.to_string().into();
 
-            if a != DEFAULT_RATING.parse::<f64>().unwrap() {
-                if *write_question_gap {
-                    file.write_all("\n".as_bytes())?;
-                }
-                file_parsing::write_question(&file, &question)?;
-                file_parsing::write_answer(&file, &a.to_string())?;
-                return Ok(true);
+        if a != DEFAULT_RATING.parse::<f64>().unwrap() {
+            if *write_question_gap {
+                file.write_all("\n".as_bytes())?;
             }
+            file_parsing::write_question(file, question)?;
+            file_parsing::write_answer(file, &a.to_string())?;
+            return Ok(true);
         }
-        None => (),
     }
-    args.sometimes.map(|s: bool| {
-        if s == DEFAULT_SOMETIMES.parse::<bool>().unwrap() {
-            *question_chance = QUESTION_CHANCE;
-        }
-    });
+    if let Some(s) = args.sometimes &&
+        s == DEFAULT_SOMETIMES.parse::<bool>().unwrap() 
+    {
+        *question_chance = QUESTION_CHANCE;
+    }
 
     Ok(false)
 }
