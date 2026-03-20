@@ -57,9 +57,7 @@ pub fn parse_date_file(content: &str) -> std::io::Result<String> {
     loop {
         match get_next_chunk(&mut lines) {
             Ok(this_chunk) => {
-                let chunk_type = this_chunk
-                    .get_type()
-                    .unwrap_or(QuestionType::Empty);
+                let chunk_type = this_chunk.get_type().unwrap_or(QuestionType::Empty);
 
                 let mut answer_iter = this_chunk.get_answer()?.into_iter();
                 let info = this_chunk.get_informative()?.get_text()?;
@@ -224,8 +222,8 @@ pub fn write_display_content(
     let mut line_y = 0;
     let mut path_str: String = "".to_string();
 
-    if let Some(stem_os) = path.file_stem() 
-        && let Some(stem_str) = stem_os.to_str() 
+    if let Some(stem_os) = path.file_stem()
+        && let Some(stem_str) = stem_os.to_str()
     {
         let weekday = chrono::NaiveDate::parse_from_str(stem_str, "%Y-%m-%d")
             .unwrap()
@@ -241,7 +239,7 @@ pub fn write_display_content(
     let init_line_y = 2;
     line_y = init_line_y;
 
-    for (line_idx, line ) in terminal_lines.iter().enumerate() {
+    for (line_idx, line) in terminal_lines.iter().enumerate() {
         if line_idx >= height_index
             && line_idx < height_index + term_height as usize - init_line_y as usize
         {
