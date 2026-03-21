@@ -20,7 +20,7 @@ Another common first step is to call the jrl executable in your config file so y
 Add the following in your .bashrc file:
 
 ```bash
-jl -s
+jrl -s
 ```
 
 In order to replace the quesitons file used for prompts, create a questions.txt file in the current directory using the template provided in the repository and run:
