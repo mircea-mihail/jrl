@@ -8,18 +8,17 @@
 mod cli;
 mod question_structs;
 use question_structs::Question;
+mod entries_information;
 mod file_parsing;
 mod loops;
 mod pager;
 mod utility;
-mod entries_information;
 
-use home;
 use core::f64;
-use std::path::PathBuf;
 use rand::Rng;
 use std::fs;
 use std::fs::OpenOptions;
+use std::path::PathBuf;
 
 use crossterm::{execute, terminal};
 use rustyline::error::ReadlineError;
@@ -42,10 +41,7 @@ fn main() -> rustyline::Result<()> {
                 execute!(stdout, terminal::LeaveAlternateScreen)?;
                 terminal::disable_raw_mode()?;
 
-                return Err(ReadlineError::Io(io::Error::new(
-                    io::ErrorKind::Other,
-                    e.to_string(),
-                )));
+                return Err(ReadlineError::Io(io::Error::other(e.to_string())));
             }
         }
     }
@@ -55,7 +51,7 @@ fn main() -> rustyline::Result<()> {
 
         return Ok(());
     }
-    
+
     let days_before_today: i64 = cli::parse_days_before();
 
     let today_file = utility::get_day_file_name(days_before_today);
@@ -75,31 +71,29 @@ fn main() -> rustyline::Result<()> {
     // copy current dir questions file in ~/.jrl folder or create an empty one otherwise if not existing there
     let mut this_dir_questions_path = PathBuf::new();
     this_dir_questions_path.push("./");
-    this_dir_questions_path.push(   QUESTION_FILE_NAME);
+    this_dir_questions_path.push(QUESTION_FILE_NAME);
 
     let tmp_file = file_parsing::generate_jumbled_questions_file_name();
 
     if cli::install_questions() {
-        if this_dir_questions_path.exists(){ 
+        if this_dir_questions_path.exists() {
             fs::copy(&this_dir_questions_path, &questions_file_path)?;
             println!("Succesfully installed the questions.txt file");
 
             if tmp_file.exists() {
                 std::fs::remove_file(tmp_file)?;
             }
- 
+
             return Ok(());
-        }
-        else {
+        } else {
             println!("No quesions.txt file in the current directory");
             return Ok(());
         }
     }
     if !questions_file_path.exists() {
-        if this_dir_questions_path.exists(){ 
+        if this_dir_questions_path.exists() {
             fs::copy(&this_dir_questions_path, &questions_file_path)?;
-        }
-        else {
+        } else {
             fs::write(
                 &questions_file_path,
                 "l: Long question\ns: Short question\n",
@@ -112,10 +106,7 @@ fn main() -> rustyline::Result<()> {
         }
     }
 
-    let mut file: fs::File = OpenOptions::new()
-        .write(true)
-        .append(true)
-        .open(&today_file_path)?;
+    let mut file: fs::File = OpenOptions::new().append(true).open(&today_file_path)?;
 
     let mut question_to_ask: Question = Question::default();
     let mut question_chance: f64 = 1.0;
