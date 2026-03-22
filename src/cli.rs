@@ -56,7 +56,7 @@ pub struct Cli {
     )]
     sometimes: Option<bool>,
 
-    /// Show all entries into the journal
+    /// Show all entries into the journal. Argument format: yyyy-mm-dd
     #[arg (
         short,
         long,
