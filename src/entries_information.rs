@@ -1,6 +1,6 @@
 use crate::pager;
 use crate::{
-    loops::get_jrl_files,
+    utility,
     question_structs::{ChunkParser, Informative, PromptQuestionType},
 };
 use std::fs;
@@ -9,7 +9,7 @@ use std::{collections::BTreeMap, path::PathBuf};
 
 pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::Result<()> {
     let mut word_dict: BTreeMap<String, i64> = BTreeMap::new();
-    let all_files = get_jrl_files(&jrl_dir_path)?;
+    let all_files = utility::get_jrl_files(&jrl_dir_path)?;
 
     let recent_entries = &all_files[all_files.len().saturating_sub(entries_to_consider)..];
 
@@ -101,7 +101,6 @@ pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::
                 best_rating_opt = Some(file_rating);
                 if let Some(file_name) = file.file_stem() {
                     best_rating_day = file_name.to_string_lossy().to_string();
-                    best_rating_day = best_rating_day.replace("-", ".");
                 }
                 best_description = description.clone();
             }
@@ -109,7 +108,6 @@ pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::
                 worst_rating_opt = Some(file_rating);
                 if let Some(file_name) = file.file_stem() {
                     worst_rating_day = file_name.to_string_lossy().to_string();
-                    worst_rating_day = worst_rating_day.replace("-", ".");
                 }
                 worst_description = description.clone();
             }
@@ -118,7 +116,6 @@ pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::
             longest_text_rating_opt = final_file_rating_opt;
             if let Some(file_name) = file.file_stem() {
                 longest_text_day = file_name.to_string_lossy().to_string();
-                longest_text_day = longest_text_day.replace("-", ".");
             }
             longest_description = description.clone();
         }
