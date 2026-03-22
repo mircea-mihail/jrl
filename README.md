@@ -69,7 +69,7 @@ jrl [OPTIONS]
 | `-n` | `--note` | `[NOTE]` | Add a short note during the day |
 | `-r` | `--rating` | `[RATING]` | Rate your day out of 10 (can be any number) |
 | `-s` | `--sometimes` | `[SOMETIMES]` | Lower chances of a question being asked (`true` / `false`) |
-| `-e` | `--entries` | `[<ENTRIES>]` | Show all entries into the journal [possible values: true, false]. True by default |
+| `-e` | `--entries` | `[<ENTRIES>]` | --entries [<ENTRIES>]. Show all entries into the journal. Argument format: yyyy-mm-dd |
 | `-u` | `--update` | `<UPDATE>` | Update journal from x days ago |
 |      |  `--install-questions`| `[<INSTALL_QUESTIONS>]` | Use the questions from the questions.txt file in the current directory [possible values: true, false]. True by default |
 | `-a` | `--analytics` | `[<ANALYTICS>]` | Show analytics for the past x journal entries. 30 by default |
