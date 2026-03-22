@@ -12,7 +12,7 @@ const DEFAULT_DESCRIPTION: &str = "No description provided";
 const DEFAULT_NOTE: &str = "No note provided";
 const DEFAULT_RATING: &str = "1212.1212";
 const DEFAULT_SOMETIMES: &str = "true";
-const DEFAULT_ENTRIES: &str = "true";
+const DEFAULT_ENTRIES: &str = "0000-00-00";
 const DEFAULT_UPDATE_QUESTIONS: &str = "true";
 const DEFAULT_ANALYTICS: &str = "30";
 
@@ -63,7 +63,7 @@ pub struct Cli {
         num_args = 0..=1,
         default_missing_value = DEFAULT_ENTRIES
     )]
-    entries: Option<bool>,
+    entries: Option<String>,
 
     /// Update journal from x days ago
     #[arg(short, long, num_args = 1)]
@@ -122,17 +122,20 @@ pub fn parse_days_before() -> i64 {
     days_before_today
 }
 
-pub fn show_entries() -> bool {
+pub fn show_entries() -> Option<String> {
     let args = Cli::parse();
-    let mut show_entries: bool = false;
+    let today = chrono::offset::Local::now().format("%Y-%m-%d").to_string();
 
-    if let Some(e) = args.entries
-        && e == DEFAULT_SOMETIMES.parse::<bool>().unwrap()
-    {
-        show_entries = true;
+    if let Some(e) = args.entries {
+        if e != DEFAULT_ENTRIES {
+            return Some(e)
+        }
+        else {
+            return Some(today)
+        }
     }
 
-    show_entries
+    None
 }
 
 pub fn parse_args(

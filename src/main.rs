@@ -31,8 +31,9 @@ fn main() -> rustyline::Result<()> {
     let mut jrl_dir_path = home::home_dir().expect("Could not find home directory");
     jrl_dir_path.push(JRL_DIR_NAME);
 
-    if cli::show_entries() {
-        match loops::view_files(&jrl_dir_path) {
+
+    if let Some(day_to_show) = cli::show_entries(){
+        match loops::view_files(&jrl_dir_path, &day_to_show) {
             Ok(_) => {
                 return Ok(());
             }
