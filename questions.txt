@@ -1,10 +1,10 @@
 s: Number of coffees? 
-s: Grams of sugar?
-s: Cups of tea?
 s: Hours on phone?
 s: Hours of sleep?
-s: Ate meat?
-s: Number of beers?
 
 l: What's a nice thing from today?
 l: What's an upsetting thing from today?
+l: What's the last thing you ate?
+l: What's the last thing you said/heared?
+l: What are you thinking of right now?
+l: What do you desire most right now?
