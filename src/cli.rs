@@ -15,6 +15,7 @@ const DEFAULT_SOMETIMES: &str = "true";
 const DEFAULT_ENTRIES: &str = "0000-00-00";
 const DEFAULT_UPDATE_QUESTIONS: &str = "true";
 const DEFAULT_ANALYTICS: &str = "30";
+const DEFAULT_QUOTE: &str = "true";
 
 const QUESTION_CHANCE: f64 = 0.5;
 
@@ -86,6 +87,25 @@ pub struct Cli {
         default_missing_value = DEFAULT_ANALYTICS
     )]
     analytics: Option<usize>,
+
+    /// Show a random quote of yours from the journal.
+    #[arg (
+        short,
+        long,
+        num_args = 0..=1,
+        default_missing_value = DEFAULT_QUOTE
+    )]
+    quote: Option<bool>,
+}
+
+pub fn show_quote() -> bool {
+    let args = Cli::parse();
+
+    if let Some(b) = args.quote {
+        return b;
+    }
+
+    false
 }
 
 pub fn install_questions() -> bool {
