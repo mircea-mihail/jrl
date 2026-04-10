@@ -47,8 +47,14 @@ fn main() -> rustyline::Result<()> {
         }
     }
 
+    if cli::show_quote() {
+        entries_information::get_random_quote(&jrl_dir_path)?;
+
+        return Ok(());
+    }
+
     if let Some(entries_to_consider) = cli::show_analytics() {
-        entries_information::get_statistics(jrl_dir_path, entries_to_consider)?;
+        entries_information::get_statistics(&jrl_dir_path, entries_to_consider)?;
 
         return Ok(());
     }
