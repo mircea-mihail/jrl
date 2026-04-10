@@ -11,6 +11,8 @@ use crate::question_structs::{
     ChunkParser, Informative, PromptQuestionType, QuestionChunk, QuestionType,
 };
 
+use rand::Rng;
+
 #[derive(Debug)]
 pub enum ChunkError {
     EmptyChunk,
@@ -42,6 +44,50 @@ pub fn get_next_chunk(
         }
     }
     Err(ChunkError::UnexpectedFileEnd)
+}
+
+pub fn get_quote_from_str(content: &str) -> std::io::Result<String> {
+    let mut lines: std::iter::Peekable<std::str::Lines<'_>> = content.lines().peekable();
+    let mut user_content: String = "".to_string();
+
+    loop {
+        match get_next_chunk(&mut lines) {
+            Ok(this_chunk) => {
+                let mut answer_iter = this_chunk.get_answer()?.into_iter();
+                let prompt_type = this_chunk.get_prompt_type()?;
+                let question_type = this_chunk.get_type()?;
+
+                if question_type != QuestionType::Empty &&
+                    prompt_type != PromptQuestionType::Rating &&
+                    question_type != QuestionType::Short 
+                {
+                    for question in answer_iter.by_ref() {
+                        let text = question.get_text()?;
+                        user_content.push_str(&format!(".{}", text));
+                    }
+                }
+            }
+            Err(ChunkError::MalformedChunk) => {
+            }
+            Err(ChunkError::EmptyChunk) => {
+            }
+            Err(ChunkError::UnexpectedFileEnd) => {
+                break;
+            }
+        }
+    }
+
+    let content_phrases: Vec<&str> = user_content
+        .split(&['.', '\n', '\t', '!', '?'][..])
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .collect();
+
+
+    let mut rng= rand::rng();
+    let rand_idx = rng.random_range(0..content_phrases.len());
+
+    Ok(content_phrases[rand_idx].to_string())
 }
 
 pub fn parse_date_file(content: &str) -> std::io::Result<String> {
