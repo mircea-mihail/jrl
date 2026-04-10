@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::pager;
 use crate::{
     utility,
@@ -7,7 +9,34 @@ use std::fs;
 use std::io;
 use std::{collections::BTreeMap, path::PathBuf};
 
-pub fn get_statistics(jrl_dir_path: PathBuf, entries_to_consider: usize) -> io::Result<()> {
+pub fn get_random_quote(jrl_dir_path: &PathBuf) -> io::Result<()> { 
+    let all_files = utility::get_jrl_files(&jrl_dir_path)?;
+
+    let mut rng= rand::rng();
+    let mut rand_idx = rng.random_range(0..all_files.len());
+    let mut random_file_ref = &all_files[rand_idx];
+
+    let mut file_content: String = fs::read_to_string(random_file_ref)?;
+
+    while file_content.is_empty() {
+        rand_idx = rng.random_range(0..all_files.len());
+        random_file_ref = &all_files[rand_idx];
+
+        file_content = fs::read_to_string(random_file_ref)?;
+    }
+    
+    println!("{}:\n{}", 
+        random_file_ref
+            .file_stem()
+            .and_then(|stem| stem.to_str())
+            .unwrap_or("unknown date"), 
+        pager::get_quote_from_str(&file_content)?
+    );
+
+    Ok(())
+}
+
+pub fn get_statistics(jrl_dir_path: &PathBuf, entries_to_consider: usize) -> io::Result<()> {
     let mut word_dict: BTreeMap<String, i64> = BTreeMap::new();
     let all_files = utility::get_jrl_files(&jrl_dir_path)?;
 
