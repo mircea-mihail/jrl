@@ -1,6 +1,7 @@
 use std::{collections::BTreeMap, io::Write};
 
 use chrono::Datelike;
+use clap::Error;
 use crossterm::{
     cursor, execute, queue,
     style::{self, Stylize},
@@ -18,6 +19,10 @@ pub enum ChunkError {
     EmptyChunk,
     MalformedChunk,
     UnexpectedFileEnd,
+}
+
+pub enum QuoteError {
+    EmptyQuote
 }
 
 pub fn get_next_chunk(
@@ -46,23 +51,35 @@ pub fn get_next_chunk(
     Err(ChunkError::UnexpectedFileEnd)
 }
 
-pub fn get_quote_from_str(content: &str) -> std::io::Result<String> {
+pub fn get_quote_from_str(content: &str) -> Result<String, QuoteError> {
     let mut lines: std::iter::Peekable<std::str::Lines<'_>> = content.lines().peekable();
     let mut user_content: String = "".to_string();
 
     loop {
         match get_next_chunk(&mut lines) {
             Ok(this_chunk) => {
-                let mut answer_iter = this_chunk.get_answer()?.into_iter();
-                let prompt_type = this_chunk.get_prompt_type()?;
-                let question_type = this_chunk.get_type()?;
+                let mut answer_iter = match this_chunk.get_answer() {
+                    Ok(v) => v.into_iter(),
+                    Err(_) => continue,
+                };
+                let prompt_type = match this_chunk.get_prompt_type() {
+                    Ok(v) => v,
+                    Err(_) => continue,
+                };
+                let question_type = match this_chunk.get_type() {
+                    Ok(v) => v,
+                    Err(_) => continue,
+                };
 
                 if question_type != QuestionType::Empty &&
                     prompt_type != PromptQuestionType::Rating &&
                     question_type != QuestionType::Short 
                 {
                     for question in answer_iter.by_ref() {
-                        let text = question.get_text()?;
+                        let text = match question.get_text() {
+                            Ok(t) => t,
+                            Err(_) => continue,
+                        };
                         user_content.push_str(&format!(".{}", text));
                     }
                 }
@@ -83,6 +100,9 @@ pub fn get_quote_from_str(content: &str) -> std::io::Result<String> {
         .filter(|s| !s.is_empty())
         .collect();
 
+    if content_phrases.is_empty() {
+        return Err(QuoteError::EmptyQuote);
+    }
 
     let mut rng= rand::rng();
     let rand_idx = rng.random_range(0..content_phrases.len());

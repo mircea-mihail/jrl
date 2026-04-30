@@ -25,13 +25,21 @@ pub fn get_random_quote(jrl_dir_path: &PathBuf) -> io::Result<()> {
         file_content = fs::read_to_string(random_file_ref)?;
     }
     
-    println!("{}:\n{}", 
-        random_file_ref
-            .file_stem()
-            .and_then(|stem| stem.to_str())
-            .unwrap_or("unknown date"), 
-        pager::get_quote_from_str(&file_content)?
-    );
+    let quote = pager::get_quote_from_str(&file_content);
+    match quote {
+        Ok(q) => {
+            println!("{}:\n{}", 
+                random_file_ref
+                    .file_stem()
+                    .and_then(|stem| stem.to_str())
+                    .unwrap_or("unknown date"), 
+                q
+            );
+        }
+        Err(_) => {
+            println!("Failed to find an interesting quote, you should journal more :)");
+        }
+    }
 
     Ok(())
 }
