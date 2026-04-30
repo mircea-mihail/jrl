@@ -1,7 +1,6 @@
 use std::{collections::BTreeMap, io::Write};
 
 use chrono::Datelike;
-use clap::Error;
 use crossterm::{
     cursor, execute, queue,
     style::{self, Stylize},
