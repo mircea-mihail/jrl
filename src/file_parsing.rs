@@ -143,9 +143,12 @@ pub fn write_question(mut file: &fs::File, question: &Question) -> io::Result<()
 }
 
 pub fn write_answer(mut file: &fs::File, answer: &String) -> io::Result<()> {
-    file.write_all("a: ".as_bytes())?;
-    file.write_all(answer.as_bytes())?;
-    file.write_all("\n".as_bytes())?;
+    // answer might contain multiple endlines if it is copy pasted so break it into multiple answers and wrap each one individually with a: and final \n
+    for line in answer.split("\n") {
+        file.write_all("a: ".as_bytes())?;
+        file.write_all(line.as_bytes())?;
+        file.write_all("\n".as_bytes())?;
+    }
 
     Ok(())
 }
